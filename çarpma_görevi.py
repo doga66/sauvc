@@ -293,4 +293,6 @@ tespit_edilen_direk_sayısı=0
 
 
 
+
+
         
