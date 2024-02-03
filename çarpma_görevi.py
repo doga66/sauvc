@@ -285,7 +285,7 @@ link.close()
 cv2.destroyAllWindows()
 
 
-tespit_edilen_direk_sayısı=0
+
 
 
 
