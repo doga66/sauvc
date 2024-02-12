@@ -1,110 +1,77 @@
 from main import *
-from eftelya import *
+from çarpma_görevi import *
 import numpy as np
-import time
+import time 
+import cv2 as cv
+import pandas as pd
 
-
-class Bucket():
-    def __init__(self, bluePoint, *RedPoints ):
-        self.bluePoint = bluePoint
-        self.RedPoints = RedPoints
-        
-
-        if len(self.bluePoint) == 0:
-            self.goToPoint(self.RedPoints)
+class DirekController:
+    def __init__(self,direkController):
+        self.direkController=direkController #önce alana girince direk kontolü yapsın.
+        if (direkController==0):
+           self.move(0,-100,0)
+           time.sleep(5)
         else:
-            self.goToPoint(self.bluePoint)
+            self.direct_detection()
 
 
-    def goToPoint(self, point):
-        self.point = point
-        self.mid = ((self.point[0][0] + self.point[1][0]) / 2 , (self.point[0][1] + self.point[1][1]) / 2 )
-        self.area = abs(self.point[0][0] - self.point[1][0]) * abs(self.point[0][1] - self.point[1][1])
-        
-        self.oneAxisCenter()
-        self.moveForward()
-        self.checkArea()
+    def move(self):
+        self.move()
 
-    def oneAxisCenter(self):
-        """
-        gonderilen noktaya göre donme gerçeklestirecek ve kova yi ortalamis olacak
-        """
-        degree = self.calculateAngle(self.mid)
-        rov.turnDegrees(degree)
 
-    def calculateAngle(self, point):
 
-        angle = np.arctan2(self.mid[1] - height/2, self.mid[0] - width/2) * 180.0 / np.pi 
-        return angle
-        
-    def moveForward(self):
-        """
-        ileri hareket gerçekleştirecek
-        """
-        rov.move(0,0,100)
+    def calculate_center(self, df, ind):
+    # İlgili veri çerçevesinden gerekli verileri alarak orta noktayı hesapla
+           x1, y1 = int(df['xmin'][ind]), int(df['ymin'][ind])
+           x2, y2 = int(df['xmax'][ind]), int(df['ymax'][ind])
 
+            
+           noktax = int(((x2+x1)/2)) 
+           noktay = int((y2+y1)/2)
+           nokta = noktax,noktay
+           
+           farkx_ = 320 - noktax
+           farky_ = 240 - noktay
+           
     
-    def checkArea(self):
-        """
-        alan kontrolu yapacak
-        """
-        if self.area < 20000:
-            self.moveForward()
-        else:
-            #alt kamera da goruntu isleme yapacak
-            pass
-
-
-    def dropBall(self):
-        """
-        topu birakacak
-        """
-        pass
+           return farkx_,farky_
 
 
 
 
-class Bucket2(Bucket):
-    def __init__(self):
-        self.goBackThreeSecond(self)
+    def direct_detection(self, tespit_edilen_direk_sayısı):
+          if tespit_edilen_direk_sayısı == 1:
+            self.calculate_center(df, ind) 
+            if(-30 <farkx_< 30 and -30 <farky_< 30):
+                self.move(0,0,100) 
+            
+          elif tespit_edilen_direk_sayısı == 2:
+            # İlk direk (sol taraftaki direk)
+           left_direct_center=self.calculate_center()
+
+          # İkinci direk (sağ taraftaki direk)
+           right_direct_center=self.calculate_center(self)
+
+          # Eğer ikinci direk daha sağda ise, ona doğru hareket et
+           if right_direct_center > left_direct_center:
+              
+              self.move()  # noktax2 - 320   
+            
+           else:
+            
+
+        # Geriye hareket ve ilerleme işlemlerini kontrol etmek için örnek kodları burada entegre edebilirsiniz
+        #self.move_back_and_forward(tespit_edilen_direk_sayısı)
+
+    #def move_back_and_forward(self, tespit_edilen_direk_sayısı):
+       #if tespit_edilen_direk_sayısı == 0:
+            # 5 saniye geri gidip durma işlemi
+            #self.move(-100, 0, 0)
+            #time.sleep(5)
+            #self.move(0, 0, 0)
+        # Diğer durumlar için gereken işlemleri buraya ekleyebilirsiniz
 
 
-
-    def goBackThreeSecond(self):
-        """
-        3 saniye geri gidecek
-        """
-        rov.move(0,0,-100)
-        timePartTwo = time.time()
-        while time.time() - timePartTwo < 3:
-            pass
-        rov.move(0,0,0)
-        
-        self.goForwardThreeSecond(self)
-
-    def goForwardThreeSecond(self):
-        """
-        3 saniye ileri gidecek
-        """
-        rov.move(0,0,100)
-        timePartTwo = time.time()
-        while time.time() - timePartTwo < 3:
-            pass
-        rov.move(0,0,0)
-
-        self.searchBall(self)
-
-    def searchBall(self):
-        """
-        top arayacak
-        """
-        pass
-        self.oneAxisCenter(self)
-    
-
-
-    def takeBall(self):
-        """
-        topu alacak
-        """
-        pass
+# Kullanım örneği:
+rov_controller = DirekController.Controller()
+rov_controller.direct_detection(tespit_edilen_direk_sayısı, df, ind)
